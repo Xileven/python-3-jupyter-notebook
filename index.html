@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="color-scheme" content="light dark"/>
+<link rel="icon" href="data:,"/>
+<title>Python 3 Jupyter Notebook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<style>
+:root{
+  --bg:#e9ebee; --paper:#ffffff; --paper2:#f7f8f9; --line:#d9dde3; --line2:#e7eaee;
+  --text:#1b1f24; --muted:#6b7280; --muted2:#9aa1ad;
+  --accent:#f37726; --accent-d:#d95f14; --green:#1a7f37; --red:#cf222e; --blue:#0969da;
+  --codebg:#f6f8fa; --outbg:#ffffff; --shadow:0 1px 3px rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.06);
+  --toolbar:#ffffff; --chip:#f0f1f3;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#131518; --paper:#1e2126; --paper2:#25282e; --line:#343943; --line2:#2b2f36;
+    --text:#e6e8eb; --muted:#9aa1ad; --muted2:#6e7681;
+    --codebg:#17191d; --outbg:#1e2126; --toolbar:#1e2126; --chip:#2a2e35;
+    --shadow:0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+a{color:var(--blue)}
+button{font-family:inherit;cursor:pointer}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+
+/* TOP BAR */
+.topbar{position:sticky;top:0;z-index:30;background:var(--toolbar);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:10px 16px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;min-width:0}
+.orbits{width:34px;height:34px;flex:0 0 34px;position:relative}
+.orbits i{position:absolute;border-radius:50%;display:block}
+.orbits i:nth-child(1){width:13px;height:13px;background:#4d4d4d;left:10px;top:1px}
+.orbits i:nth-child(2){width:9px;height:9px;background:var(--accent);left:0;top:16px}
+.orbits i:nth-child(3){width:7px;height:7px;background:#5a7a9a;right:0;top:18px}
+@media (prefers-color-scheme: dark){.orbits i:nth-child(1){background:#c9cdd3}}
+.doc-title{font-weight:700;font-size:16px;letter-spacing:-.02em;line-height:1}
+.doc-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.filename{border:1px solid transparent;background:transparent;color:var(--text);font:600 15px "IBM Plex Sans",sans-serif;padding:5px 8px;border-radius:6px;min-width:120px;max-width:260px}
+.filename:hover{border-color:var(--line)}
+.filename:focus{outline:2px solid var(--accent);border-color:transparent;background:var(--paper2)}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.kernel-pill{display:flex;align-items:center;gap:8px;background:var(--chip);border:1px solid var(--line);padding:7px 11px;border-radius:999px;font-size:12.5px;font-weight:600}
+.dot{width:9px;height:9px;border-radius:50%;background:#eab308;flex:0 0 9px}
+.dot.ready{background:var(--green)} .dot.busy{background:var(--accent);animation:pulse 1s infinite} .dot.error{background:var(--red)}
+@keyframes pulse{50%{opacity:.35}}
+.btn{border:1px solid var(--line);background:var(--paper);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px;line-height:1;white-space:nowrap}
+.btn:hover{border-color:var(--muted2);background:var(--paper2)}
+.btn.primary{background:var(--text);color:var(--paper);border-color:var(--text)}
+.btn.primary:hover{opacity:.9}
+.btn.accent{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.accent:hover{background:var(--accent-d)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.small{padding:6px 9px;font-size:12px;border-radius:7px}
+.icon{font-size:14px;line-height:1}
+
+/* TOOLBAR */
+.toolbar{position:sticky;top:57px;z-index:29;background:var(--toolbar);border-bottom:1px solid var(--line);padding:8px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toolbar .sep{width:1px;height:22px;background:var(--line);margin:0 2px}
+.toolbar .label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:2px}
+.progress{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.spinner{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* NOTEBOOK */
+.wrap{max-width:1020px;margin:0 auto;padding:18px 14px 90px}
+.intro{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.intro-card{flex:1 1 260px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.intro-card b{font-size:13px}
+.intro-card p{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.55}
+.intro-card code{font-family:"IBM Plex Mono",monospace;font-size:12px;background:var(--codebg);border:1px solid var(--line2);padding:1px 5px;border-radius:5px;color:var(--text)}
+
+.notebook{background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px 14px 22px}
+@media(min-width:700px){.notebook{padding:22px 22px 26px}}
+
+.cell{border:1px solid transparent;border-radius:10px;padding:8px 8px 10px;margin-bottom:10px;position:relative}
+.cell:focus-within{border-color:var(--line);background:var(--paper)}
+.cell.selected{border-color:#bcd3f5;box-shadow:0 0 0 3px rgba(9,105,218,.08)}
+@media (prefers-color-scheme: dark){.cell.selected{border-color:#2f4a6b;box-shadow:0 0 0 3px rgba(88,166,255,.12)}}
+.cell-head{display:flex;align-items:flex-start;gap:10px}
+.prompt{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--blue);min-width:64px;text-align:right;padding-top:11px;user-select:none;white-space:nowrap}
+.prompt.out{color:var(--red)}
+.prompt.md{color:var(--muted2);font-size:11px;padding-top:12px}
+.cell-main{flex:1;min-width:0}
+.editor-wrap{border:1px solid var(--line);border-radius:8px;background:var(--codebg);overflow:hidden;display:flex}
+.editor-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(9,105,218,.15)}
+.linenos{font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.55;color:var(--muted2);text-align:right;padding:10px 6px 10px 10px;user-select:none;white-space:pre;overflow:hidden;min-width:28px}
+textarea.code{flex:1;width:100%;border:0;background:transparent;color:var(--text);font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13.5px;line-height:1.55;padding:10px 12px 10px 4px;resize:none;outline:none;tab-size:4;white-space:pre;overflow:auto}
+textarea.mdedit{flex:1;width:100%;border:0;background:transparent;color:var(--text);font-family:"IBM Plex Mono",monospace;font-size:13.5px;line-height:1.6;padding:10px 12px;resize:none;outline:none}
+.cell-actions{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.cell-actions .btn{padding:5px 8px;font-size:11.5px}
+.run-btn{background:var(--green);color:#fff;border-color:var(--green);font-weight:700}
+.run-btn:hover{background:#146c2e;border-color:#146c2e}
+.cell-foot{display:flex;align-items:center;gap:6px;margin-top:7px;flex-wrap:wrap}
+.cell-foot .hint{font-size:11px;color:var(--muted2);margin-left:auto}
+select.type-sel{font:600 11.5px "IBM Plex Sans",sans-serif;padding:5px 6px;border-radius:7px;border:1px solid var(--line);background:var(--paper);color:var(--text)}
+
+.outputs{margin-top:8px}
+.output-row{display:flex;gap:10px;align-items:flex-start;margin-top:6px}
+.output-body{flex:1;min-width:0;border-left:0}
+pre.out{margin:0;font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;background:transparent;color:var(--text)}
+pre.out.err{color:var(--red);background:#fff1f1;border:1px solid #ffd7d5;padding:10px 12px;border-radius:8px}
+@media (prefers-color-scheme: dark){pre.out.err{background:#2a1517;border-color:#5a2326}}
+pre.out.stream{color:var(--text)}
+.result-box{border:1px solid var(--line2);background:var(--outbg);border-radius:8px;padding:10px 12px;overflow:auto}
+.result-box table{border-collapse:collapse;font-size:12.5px;font-family:"IBM Plex Mono",monospace}
+.result-box th,.result-box td{border:1px solid var(--line);padding:4px 8px;text-align:right}
+.result-box th{background:var(--paper2)}
+.plot-img{max-width:100%;height:auto;border:1px solid var(--line2);border-radius:8px;background:#fff;display:block}
+
+/* markdown rendered */
+.md-render{font-size:15px;line-height:1.7;color:var(--text);padding:2px 2px}
+.md-render h1{font-size:26px;line-height:1.2;margin:.2em 0 .4em;letter-spacing:-.02em}
+.md-render h2{font-size:21px;margin:1em 0 .4em;padding-bottom:6px;border-bottom:1px solid var(--line2)}
+.md-render h3{font-size:17px;margin:1em 0 .3em}
+.md-render p{margin:.5em 0}
+.md-render code{font-family:"IBM Plex Mono",monospace;font-size:.88em;background:var(--codebg);border:1px solid var(--line2);padding:1px 5px;border-radius:5px}
+.md-render pre{background:var(--codebg);border:1px solid var(--line);border-radius:8px;padding:12px;overflow:auto}
+.md-render pre code{background:none;border:0;padding:0}
+.md-render ul,.md-render ol{margin:.4em 0 .6em;padding-left:1.4em}
+.md-render blockquote{margin:.6em 0;padding:2px 12px;border-left:3px solid var(--accent);color:var(--muted)}
+.md-render a{color:var(--blue)}
+
+.add-row{display:flex;gap:8px;justify-content:center;margin:14px 0 2px;flex-wrap:wrap}
+.add-row button{border:1px dashed var(--line);background:var(--paper2);color:var(--muted);padding:9px 14px;border-radius:999px;font-weight:600;font-size:13px}
+.add-row button:hover{color:var(--text);border-color:var(--muted2)}
+
+.kbd{font-family:"IBM Plex Mono",monospace;font-size:11px;background:var(--chip);border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;border-radius:5px}
+.footer-note{max-width:1020px;margin:0 auto;padding:0 14px 30px;color:var(--muted);font-size:12.5px;line-height:1.6}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:50;background:#111827;color:#fff;padding:11px 16px;border-radius:999px;font-size:13.5px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.25);display:none;max-width:92vw;text-align:center}
+.toast.show{display:block}
+.hidden-input{display:none}
+@media(max-width:640px){
+  .prompt{min-width:44px;font-size:11px}
+  .topbar{padding:10px 12px}.toolbar{top:61px;padding:8px 12px}
+  .filename{max-width:150px}
+  .cell-foot .hint{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <div class="orbits" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <input id="filename" class="filename" value="Untitled.ipynb" aria-label="Notebook filename"/>
+        <span style="font-size:11px;background:#fff3e8;color:#9a4a0a;border:1px solid #ffd9b8;padding:3px 7px;border-radius:999px;font-weight:700">PYTHON 3</span>
+      </div>
+      <div class="doc-sub">Jupyter Notebook • Runs 100% in your browser via Pyodide (WebAssembly)</div>
+    </div>
+  </div>
+  <div class="top-right">
+    <div class="kernel-pill"><span id="kernelDot" class="dot"></span><span id="kernelText">Starting kernel…</span></div>
+    <button class="btn" id="restartBtn">↻ Restart kernel</button>
+    <button class="btn" id="downloadBtn">↓ Download .ipynb</button>
+    <label class="btn" for="importFile" style="cursor:pointer">↑ Open .ipynb</label>
+    <input id="importFile" class="hidden-input" type="file" accept=".ipynb,application/json"/>
+  </div>
+</header>
+
+<div class="toolbar">
+  <span class="label">Cell</span>
+  <button class="btn accent" id="runAllBtn">▶ Run All</button>
+  <button class="btn" id="addCodeTop">+ Code</button>
+  <button class="btn" id="addMdTop">+ Markdown</button>
+  <div class="sep"></div>
+  <button class="btn" id="clearBtn">Clear outputs</button>
+  <button class="btn" id="downloadPyBtn">Download .py</button>
+  <div class="sep"></div>
+  <div class="progress" id="progressBox"><span class="spinner" id="spinner"></span><span id="progressText">Loading Python runtime — first load takes ~10–20s…</span></div>
+</div>
+
+<main class="wrap">
+  <div class="intro">
+    <div class="intro-card"><b>▶ Run a cell</b><p>Click <b>Run</b> or press <span class="kbd">Shift</span> + <span class="kbd">Enter</span>. <span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> runs without moving. Code runs in a real Python 3 interpreter compiled to WebAssembly.</p></div>
+    <div class="intro-card"><b>📦 Pre-installed</b><p><code>numpy</code> &nbsp;<code>pandas</code> &nbsp;<code>matplotlib</code> — plus the full Python standard library. Just <code>import</code> and go. Plots render inline automatically.</p></div>
+    <div class="intro-card"><b>💾 Your work</b><p>Download as <code>.ipynb</code> to open later in Jupyter, VS Code, or Colab — or re-open a notebook here with <b>Open .ipynb</b>. Everything stays on this device.</p></div>
+  </div>
+
+  <section class="notebook" id="notebook" aria-label="Notebook cells"></section>
+
+  <div class="add-row">
+    <button id="addCodeBottom">+ Add Code Cell</button>
+    <button id="addMdBottom">+ Add Markdown Cell</button>
+  </div>
+</main>
+
+<p class="footer-note">Kernel: CPython via Pyodide 0.26.4 (WebAssembly). Variables persist between cells until you restart the kernel, just like Jupyter. No code leaves your browser — there is no server executing it. If a cell is taking long, restart the kernel to reset state. Cells can also read data straight from a URL — e.g. <span class="mono">pd.read_csv("https://…")</span> — fetched by your browser, so the host has to allow cross-origin (CORS) access.</p>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var pyodide = null;
+var kernelReady = false;
+var kernelBusy = false;
+var execCounter = 1;
+var cellSeq = 0;
+var cells = []; // {id,type,el,textarea,outputEl,countEl,mdRender,mdWrap}
+
+var STARTER = [
+  {type:'code', source:""}
+];
+
+function $(id){return document.getElementById(id)}
+function toast(msg, ms){
+  var t=$('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('show')}, ms||2600);
+}
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function renderMarkdown(src){
+  var html = escapeHtml(src);
+  // code blocks
+  html = html.replace(/```([\s\S]*?)```/g, function(m,c){return '<pre><code>'+c.trim()+'</code></pre>'});
+  html = html.replace(/^### (.*)$/gm,'<h3>$1</h3>').replace(/^## (.*)$/gm,'<h2>$1</h2>').replace(/^# (.*)$/gm,'<h1>$1</h1>');
+  html = html.replace(/^&gt; (.*)$/gm,'<blockquote>$1</blockquote>');
+  html = html.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\*([^*]+)\*/g,'<em>$1</em>');
+  html = html.replace(/`([^`]+)`/g,'<code>$1</code>');
+  html = html.replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  // lists: group consecutive - or * lines
+  html = html.replace(/(?:^|\n)((?:- .*(?:\n|$))+)/g, function(m,block){
+    var items = block.trim().split('\n').map(function(l){return '<li>'+l.replace(/^- /,'')+'</li>'}).join('');
+    return '\n<ul>'+items+'</ul>\n';
+  });
+  // paragraphs
+  var parts = html.split(/\n{2,}/).map(function(p){
+    if(/^\s*<(h\d|pre|ul|ol|blockquote)/.test(p)) return p;
+    return '<p>'+p.replace(/\n/g,'<br>')+'</p>';
+  });
+  return parts.join('\n');
+}
+function autoResize(ta){
+  ta.style.height='auto';
+  ta.style.height=Math.max(44, ta.scrollHeight+2)+'px';
+  updateLineNos(ta);
+}
+function updateLineNos(ta){
+  var cell = ta._cell; if(!cell || !cell.lineEl) return;
+  var n = (ta.value.match(/\n/g)||[]).length+1;
+  var s=''; for(var i=1;i<=n;i++) s+=i+'\n';
+  cell.lineEl.textContent=s;
+}
+
+function createCell(type, source, index){
+  cellSeq++;
+  var id='cell-'+cellSeq+'-'+Date.now();
+  var cell={id:id,type:type,source:source||'',execution_count:null};
+  var wrap=document.createElement('div'); wrap.className='cell'; wrap.dataset.id=id;
+  var head=document.createElement('div'); head.className='cell-head';
+  var prompt=document.createElement('div'); prompt.className='prompt'+(type==='markdown'?' md':'');
+  prompt.textContent = type==='markdown' ? 'Markdown' : 'In [ ]:';
+  var main=document.createElement('div'); main.className='cell-main';
+
+  // editor / render area
+  var editorWrap=document.createElement('div'); editorWrap.className='editor-wrap';
+  var lineEl=null, ta=document.createElement('textarea');
+  ta.spellcheck=false; ta.setAttribute('aria-label', type==='markdown'?'Markdown cell editor':'Code cell editor');
+  if(type==='code'){
+    lineEl=document.createElement('div'); lineEl.className='linenos'; lineEl.textContent='1\n';
+    ta.className='code'; ta.placeholder='# Write Python here — Shift+Enter to run';
+    editorWrap.appendChild(lineEl); editorWrap.appendChild(ta);
+  } else {
+    ta.className='mdedit'; ta.placeholder='# Write Markdown here';
+    editorWrap.appendChild(ta);
+  }
+  ta.value=source||'';
+  ta._cell=cell;
+  cell.lineEl=lineEl; cell.textarea=ta;
+
+  var mdRender=document.createElement('div'); mdRender.className='md-render';
+  if(type==='markdown'){
+    mdRender.innerHTML=renderMarkdown(source||'*Empty markdown cell — double-click to edit*');
+    editorWrap.style.display='none';
+    mdRender.title='Double-click to edit';
+    mdRender.addEventListener('dblclick', function(){ setMdEditing(cell,true); ta.focus(); });
+  } else { mdRender.style.display='none'; }
+
+  var foot=document.createElement('div'); foot.className='cell-foot';
+  var actions=document.createElement('div'); actions.className='cell-actions';
+  function mkBtn(label, title, fn, cls){
+    var b=document.createElement('button'); b.className='btn small '+(cls||''); b.innerHTML=label; b.title=title;
+    b.addEventListener('click', function(e){e.preventDefault(); fn();}); return b;
+  }
+  if(type==='code'){
+    actions.appendChild(mkBtn('▶ Run','Run cell (Shift+Enter)', function(){ runCell(cell, false); }, 'run-btn'));
+  } else {
+    actions.appendChild(mkBtn('✓ Render','Render markdown (Shift+Enter)', function(){ setMdEditing(cell,false); }, 'run-btn'));
+    actions.appendChild(mkBtn('✎ Edit','Edit markdown', function(){ setMdEditing(cell,true); ta.focus(); }));
+  }
+  var sel=document.createElement('select'); sel.className='type-sel'; sel.title='Cell type';
+  sel.innerHTML='<option value="code">Code</option><option value="markdown">Markdown</option>';
+  sel.value=type;
+  sel.addEventListener('change', function(){ convertCell(cell, sel.value); });
+  actions.appendChild(sel);
+  actions.appendChild(mkBtn('↑','Move cell up', function(){ moveCell(cell,-1); }));
+  actions.appendChild(mkBtn('↓','Move cell down', function(){ moveCell(cell,1); }));
+  actions.appendChild(mkBtn('⧉','Duplicate cell', function(){ duplicateCell(cell); }));
+  actions.appendChild(mkBtn('✕','Delete cell', function(){ deleteCell(cell); }));
+  foot.appendChild(actions);
+  var hint=document.createElement('span'); hint.className='hint';
+  hint.innerHTML = type==='code' ? '<span class="kbd">Shift</span>+<span class="kbd">Enter</span> run &amp; next &nbsp;•&nbsp; <span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> run' : 'Double-click preview to edit';
+  foot.appendChild(hint);
+
+  var outputs=document.createElement('div'); outputs.className='outputs';
+  cell.outputEl=outputs; cell.promptEl=prompt; cell.mdRender=mdRender; cell.editorWrap=editorWrap; cell.el=wrap; cell.selectEl=sel;
+
+  main.appendChild(mdRender); main.appendChild(editorWrap); main.appendChild(foot); main.appendChild(outputs);
+  head.appendChild(prompt); head.appendChild(main); wrap.appendChild(head);
+
+  ta.addEventListener('input', function(){ cell.source=ta.value; autoResize(ta); });
+  ta.addEventListener('keydown', function(e){
+    if(e.key==='Enter' && e.shiftKey){ e.preventDefault(); if(cell.type==='markdown'){ setMdEditing(cell,false); focusNext(cell); } else { runCell(cell,true); } }
+    else if(e.key==='Enter' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); if(cell.type==='code') runCell(cell,false); else setMdEditing(cell,false); }
+    else if(e.key==='Tab'){ e.preventDefault(); var s=ta.selectionStart, en=ta.selectionEnd; ta.value=ta.value.substring(0,s)+'    '+ta.value.substring(en); ta.selectionStart=ta.selectionEnd=s+4; cell.source=ta.value; autoResize(ta); }
+  });
+  ta.addEventListener('focus', function(){ selectCell(cell); });
+  wrap.addEventListener('click', function(){ selectCell(cell); });
+
+  var nb=$('notebook');
+  if(typeof index==='number' && index>=0 && index<nb.children.length){ nb.insertBefore(wrap, nb.children[index]); }
+  else { nb.appendChild(wrap); }
+  // position in cells array
+  var pos = (typeof index==='number') ? index : cells.length;
+  cells.splice(pos,0,cell);
+  setTimeout(function(){ autoResize(ta); },0);
+  return cell;
+}
+function selectCell(cell){
+  cells.forEach(function(c){ if(c.el) c.el.classList.remove('selected'); });
+  if(cell.el) cell.el.classList.add('selected');
+}
+function setMdEditing(cell, editing){
+  if(editing){ cell.editorWrap.style.display='flex'; cell.mdRender.style.display='none'; setTimeout(function(){autoResize(cell.textarea)},0); }
+  else { cell.source=cell.textarea.value; cell.mdRender.innerHTML=renderMarkdown(cell.source||'*Empty markdown cell — double-click to edit*'); cell.editorWrap.style.display='none'; cell.mdRender.style.display='block'; }
+}
+function convertCell(cell, newType){
+  if(newType===cell.type) return;
+  var idx=cells.indexOf(cell); var src=cell.textarea.value;
+  deleteCell(cell, true);
+  var nc=createCell(newType, src, idx);
+  if(newType==='markdown') setMdEditing(nc,false);
+  nc.textarea.focus();
+}
+function moveCell(cell, dir){
+  var idx=cells.indexOf(cell); var j=idx+dir; if(j<0||j>=cells.length) return;
+  cells.splice(idx,1); cells.splice(j,0,cell);
+  var nb=$('notebook');
+  if(dir<0) nb.insertBefore(cell.el, cells[j-1] ? cells[j-1].el : null);
+  // simpler: re-append in order
+  cells.forEach(function(c){ nb.appendChild(c.el); });
+  cell.el.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+function duplicateCell(cell){
+  var idx=cells.indexOf(cell);
+  var nc=createCell(cell.type, cell.textarea.value, idx+1);
+  if(cell.type==='markdown') setMdEditing(nc,false);
+}
+function deleteCell(cell, silent){
+  var idx=cells.indexOf(cell); if(idx>-1) cells.splice(idx,1);
+  if(cell.el && cell.el.parentNode) cell.el.parentNode.removeChild(cell.el);
+  if(cells.length===0) createCell('code','');
+  if(!silent) toast('Cell deleted');
+}
+function focusNext(cell){
+  var idx=cells.indexOf(cell);
+  if(idx>=0 && idx<cells.length-1){ var n=cells[idx+1]; if(n.type==='markdown') setMdEditing(n,true); n.textarea.focus(); n.el.scrollIntoView({block:'center',behavior:'smooth'}); }
+  else { var nc=createCell('code',''); nc.textarea.focus(); nc.el.scrollIntoView({block:'center',behavior:'smooth'}); }
+}
+function clearOutputs(){
+  cells.forEach(function(c){
+    if(c.outputEl) c.outputEl.innerHTML='';
+    c.execution_count=null;
+    if(c.promptEl && c.type==='code') c.promptEl.textContent='In [ ]:';
+  });
+  execCounter=1;
+}
+function addOutput(cell, kind, content, isHtml){
+  var row=document.createElement('div'); row.className='output-row';
+  var p=document.createElement('div'); p.className='prompt out';
+  p.textContent = kind==='result' ? ('Out['+cell.execution_count+']:') : '';
+  var body=document.createElement('div'); body.className='output-body';
+  if(kind==='error'){ var pre=document.createElement('pre'); pre.className='out err'; pre.textContent=content; body.appendChild(pre); }
+  else if(kind==='plot'){ var img=document.createElement('img'); img.className='plot-img'; img.alt='Matplotlib plot output'; img.src='data:image/png;base64,'+content; body.appendChild(img); }
+  else if(kind==='result' && isHtml){ var box=document.createElement('div'); box.className='result-box'; box.innerHTML=content; body.appendChild(box); }
+  else if(kind==='result'){ var box2=document.createElement('div'); box2.className='result-box'; var pre2=document.createElement('pre'); pre2.className='out'; pre2.textContent=content; box2.appendChild(pre2); body.appendChild(box2); }
+  else { var pre3=document.createElement('pre'); pre3.className='out stream'; pre3.textContent=content; body.appendChild(pre3); }
+  row.appendChild(p); row.appendChild(body); cell.outputEl.appendChild(row);
+}
+
+var RUNNER = [
+"import ast, io, sys, base64, traceback",
+"def _muse_exec(code):",
+"    result_repr = None",
+"    result_html = None",
+"    plots = []",
+"    try:",
+"        tree = ast.parse(code)",
+"        last = None",
+"        if tree.body and isinstance(tree.body[-1], ast.Expr):",
+"            last = tree.body.pop()",
+"        if tree.body:",
+"            exec(compile(tree, '<cell>', 'exec'), globals())",
+"        res = None",
+"        if last is not None:",
+"            res = eval(compile(ast.Expression(last.value), '<cell>', 'eval'), globals())",
+"        if res is not None:",
+"            if hasattr(res, '_repr_html_'):",
+"                try:",
+"                    result_html = res._repr_html_()",
+"                except Exception:",
+"                    pass",
+"            result_repr = repr(res)",
+"        try:",
+"            import matplotlib",
+"            import matplotlib.pyplot as plt",
+"            for num in list(plt.get_fignums()):",
+"                fig = plt.figure(num)",
+"                buf = io.BytesIO()",
+"                fig.savefig(buf, format='png', dpi=150, bbox_inches='tight')",
+"                buf.seek(0)",
+"                plots.append(base64.b64encode(buf.read()).decode('ascii'))",
+"            if plots:",
+"                plt.close('all')",
+"        except Exception:",
+"            pass",
+"    except Exception:",
+"        traceback.print_exc()",
+"    return {'repr': result_repr, 'html': result_html, 'plots': plots}",
+""].join("\n");
+
+// Browser builds of CPython (Pyodide) have no socket/HTTPS handlers, so
+// urllib.request.urlopen raises "unknown url type: https" and pandas calls
+// like pd.read_csv("https://...") fail. Patch urlopen to fetch http(s) URLs
+// through the browser (synchronous XHR) and hand pandas a BytesIO response.
+var URL_SHIM = [
+"import io as _muse_io",
+"import email.message as _muse_em",
+"import urllib.request as _muse_ureq",
+"import urllib.error as _muse_uerr",
+"if not getattr(_muse_ureq.urlopen, '_muse_patched', False):",
+"    _muse_orig_urlopen = _muse_ureq.urlopen",
+"    def _muse_urlopen(url, data=None, timeout=None, **kwargs):",
+"        full = getattr(url, 'full_url', url)",
+"        if not (isinstance(full, str) and (full.startswith('http://') or full.startswith('https://'))):",
+"            return _muse_orig_urlopen(url, data=data, timeout=timeout, **kwargs)",
+"        from js import XMLHttpRequest, Uint8Array",
+"        xhr = XMLHttpRequest.new()",
+"        xhr.open('POST' if data is not None else 'GET', full, False)",
+"        xhr.responseType = 'arraybuffer'",
+"        if isinstance(timeout, (int, float)) and timeout and timeout > 0:",
+"            try:",
+"                xhr.timeout = int(timeout * 1000)",
+"            except Exception:",
+"                pass",
+"        for _k, _v in dict(getattr(url, 'headers', None) or {}).items():",
+"            try:",
+"                xhr.setRequestHeader(str(_k), str(_v))",
+"            except Exception:",
+"                pass",
+"        try:",
+"            if data is None:",
+"                xhr.send()",
+"            elif isinstance(data, (bytes, bytearray)):",
+"                xhr.send(Uint8Array.new(bytes(data)))",
+"            else:",
+"                xhr.send(data)",
+"        except Exception:",
+"            raise _muse_uerr.URLError('Could not download ' + full + ' - the browser blocked or failed the request. Browser Python can only fetch URLs whose server allows cross-origin (CORS) access.')",
+"        status = int(xhr.status or 0)",
+"        if status == 0:",
+"            raise _muse_uerr.URLError('Could not download ' + full + ' - network or CORS error (the server did not let the browser read it).')",
+"        payload = bytes(Uint8Array.new(xhr.response).to_py())",
+"        resp = _muse_io.BytesIO(payload)",
+"        if status >= 400:",
+"            raise _muse_uerr.HTTPError(full, status, str(xhr.statusText or 'HTTP error'), None, resp)",
+"        resp.url = full",
+"        resp.status = status",
+"        resp.code = status",
+"        _raw_headers = xhr.getAllResponseHeaders() or ''",
+"        def _muse_info():",
+"            m = _muse_em.Message()",
+"            for line in _raw_headers.splitlines():",
+"                if ':' in line:",
+"                    k, v = line.split(':', 1)",
+"                    m[k.strip()] = v.strip()",
+"            return m",
+"        resp.info = _muse_info",
+"        resp.headers = _muse_info()",
+"        resp.geturl = lambda: full",
+"        return resp",
+"    _muse_urlopen._muse_patched = True",
+"    _muse_ureq.urlopen = _muse_urlopen",
+""].join("\n");
+
+async function runCell(cell, advance){
+  if(cell.type==='markdown'){ setMdEditing(cell,false); if(advance) focusNext(cell); return; }
+  if(!kernelReady){ toast(kernelFailed ? 'Kernel failed to start — press Restart kernel (top right) to retry.' : 'Python kernel is still starting — give it a few seconds, then run again.'); return; }
+  if(kernelBusy){ toast('Kernel is busy running another cell…'); return; }
+  var code=cell.textarea.value; cell.source=code;
+  cell.outputEl.innerHTML='';
+  cell.execution_count=execCounter;
+  cell.promptEl.textContent='In ['+execCounter+']:';
+  var myCount=execCounter; execCounter++;
+  setKernelBusy(true);
+  var stdoutBuf='', stderrBuf='';
+  pyodide.setStdout({batched:function(s){ stdoutBuf+=s+'\n'; }});
+  pyodide.setStderr({batched:function(s){ stderrBuf+=s+'\n'; }});
+  try{
+    pyodide.globals.set('_muse_code', code);
+    var out = await pyodide.runPythonAsync("_muse_exec(_muse_code)");
+    var obj = out.toJs({dict_converter:Object.fromEntries}); out.destroy();
+    if(stdoutBuf.trim()) addOutput(cell,'stream', stdoutBuf.replace(/\n$/,''));
+    if(stderrBuf.trim()){
+      // tracebacks go to stderr via print_exc? traceback prints to stderr — treat as error if it looks like traceback, else stream
+      if(stderrBuf.indexOf('Traceback')!==-1) addOutput(cell,'error', stderrBuf.replace(/\n$/,''));
+      else addOutput(cell,'stream', stderrBuf.replace(/\n$/,''));
+    }
+    if(obj.plots && obj.plots.length){ obj.plots.forEach(function(p){ addOutput(cell,'plot',p); }); }
+    if(obj.html){ addOutput(cell,'result', obj.html, true); }
+    else if(obj.repr){ addOutput(cell,'result', obj.repr, false); }
+  }catch(e){
+    if(stdoutBuf.trim()) addOutput(cell,'stream', stdoutBuf.replace(/\n$/,''));
+    var msg = (e && e.message) ? e.message : String(e);
+    // Clean Pyodide wrapper lines
+    msg = msg.split('\n').filter(function(l){ return l.indexOf('pyodide')===-1 || l.indexOf('Traceback')!==-1; }).join('\n');
+    addOutput(cell,'error', msg.trim() || stderrBuf);
+  }finally{
+    setKernelBusy(false);
+  }
+  if(advance) focusNext(cell);
+}
+function setKernelBusy(b){
+  kernelBusy=b;
+  var dot=$('kernelDot'), txt=$('kernelText');
+  if(b){ dot.className='dot busy'; txt.textContent='Python 3 • Busy'; $('progressText').textContent='Running cell…'; }
+  else if(kernelReady){ dot.className='dot ready'; txt.textContent='Python 3 • Idle'; $('progressText').textContent='Kernel ready — numpy, pandas & matplotlib loaded.'; $('spinner').style.display='none'; }
+}
+async function runAll(){
+  for(var i=0;i<cells.length;i++){
+    var c=cells[i];
+    if(c.type==='markdown'){ setMdEditing(c,false); continue; }
+    await runCell(c,false);
+  }
+  toast('Finished running all cells');
+}
+var PYODIDE_CDNS=[
+  'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/',
+  'https://unpkg.com/pyodide@0.26.4/full/'
+];
+var kernelFailed=false;
+var kernelLoading=false;
+function loadScriptOnce(url){
+  return new Promise(function(resolve,reject){
+    var s=document.createElement('script'); s.src=url; s.async=true;
+    s.onload=function(){ resolve(); };
+    s.onerror=function(){ reject(new Error('Could not load '+url)); };
+    document.head.appendChild(s);
+  });
+}
+function withTimeout(promise, ms, label){
+  return Promise.race([promise, new Promise(function(resolve,reject){
+    setTimeout(function(){ reject(new Error(label+' timed out after '+Math.round(ms/1000)+'s')); }, ms);
+  })]);
+}
+async function initKernel(){
+  if(kernelReady || kernelLoading) return;
+  kernelLoading=true; kernelFailed=false;
+  var lastErr=null;
+  for(var attempt=0; attempt<PYODIDE_CDNS.length; attempt++){
+    var base=PYODIDE_CDNS[attempt];
+    try{
+      $('kernelDot').className='dot'; $('kernelText').textContent='Starting kernel…';
+      $('spinner').style.display='inline-block';
+      $('progressText').textContent='Downloading Python runtime (WebAssembly)…'+(attempt>0 ? ' (retrying via mirror '+base.split('/')[2]+')' : '');
+      if(typeof loadPyodide!=='function'){ await withTimeout(loadScriptOnce(base+'pyodide.js'), 60000, 'Pyodide loader download'); }
+      if(typeof loadPyodide!=='function') throw new Error('Pyodide loader unavailable');
+      pyodide = await withTimeout(loadPyodide({indexURL:base}), 120000, 'Python runtime load');
+      $('progressText').textContent='Loading numpy, pandas & matplotlib…';
+      await withTimeout(pyodide.loadPackage(['numpy','pandas','matplotlib']), 180000, 'Package load');
+      await pyodide.runPythonAsync(RUNNER);
+      await pyodide.runPythonAsync(URL_SHIM);
+      kernelReady=true; kernelLoading=false;
+      $('kernelDot').className='dot ready'; $('kernelText').textContent='Python 3 • Idle';
+      $('progressText').textContent='Kernel ready — numpy, pandas & matplotlib loaded. Press Shift+Enter in any cell.';
+      $('spinner').style.display='none';
+      toast('🐍 Python kernel ready — run your first cell!');
+      return;
+    }catch(e){
+      lastErr=e; pyodide=null;
+      console.error('Kernel start attempt '+(attempt+1)+' via '+base+' failed:', e);
+    }
+  }
+  kernelLoading=false; kernelFailed=true;
+  $('kernelDot').className='dot error'; $('kernelText').textContent='Kernel failed to start';
+  $('progressText').textContent='Could not load the Python runtime'+(lastErr && lastErr.message ? ' ('+lastErr.message+')' : '')+'. Check your connection, then press Restart kernel to try again.';
+  $('spinner').style.display='none';
+}
+function restartKernel(){
+  // Pyodide can't be torn down cleanly in-page; reload is the honest restart, preserving notebook in memory is not possible across reload.
+  // Instead: clear outputs, reset counter, and clear user globals by re-running runner + deleting non-standard globals.
+  if(!kernelReady){ if(kernelLoading){ toast('Kernel is still starting…'); } else { toast('Retrying kernel startup…'); initKernel(); } return; }
+  clearOutputs();
+  try{
+    pyodide.runPython([
+"for _k in list(globals().keys()):",
+"    if not _k.startswith('_muse') and _k not in ('_muse_exec','_muse_code'):",
+"        if _k not in ('__builtins__',):",
+"            try:",
+"                del globals()[_k]",
+"            except Exception:",
+"                pass",
+"import ast, io, sys, base64, traceback",
+""].join('\n'));
+    pyodide.runPython(RUNNER);
+    pyodide.runPython(URL_SHIM);
+  }catch(e){ console.warn(e); }
+  toast('Kernel restarted — variables cleared, outputs cleared');
+}
+function buildIpynb(){
+  return {
+    cells: cells.map(function(c){
+      if(c.type==='markdown') return {cell_type:'markdown', metadata:{}, source:(c.textarea.value||'').split('\n').map(function(l,i,a){return i<a.length-1?l+'\n':l})};
+      var outs=[];
+      // outputs are not serialized in detail here; keep source + execution count so the file opens cleanly everywhere
+      return {cell_type:'code', execution_count:c.execution_count, metadata:{}, outputs:[], source:(c.textarea.value||'').split('\n').map(function(l,i,a){return i<a.length-1?l+'\n':l})};
+    }),
+    metadata:{kernelspec:{display_name:'Python 3', language:'python', name:'python3'}, language_info:{name:'python', version:'3.12'}},
+    nbformat:4, nbformat_minor:5
+  };
+}
+function download(name, text, mime){
+  var blob=new Blob([text],{type:mime}); var url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click();
+  setTimeout(function(){URL.revokeObjectURL(url); a.remove();},400);
+}
+
+// Wire toolbar
+$('runAllBtn').addEventListener('click', runAll);
+$('clearBtn').addEventListener('click', function(){ clearOutputs(); toast('Outputs cleared'); });
+$('restartBtn').addEventListener('click', restartKernel);
+$('addCodeTop').addEventListener('click', function(){ var c=createCell('code',''); c.textarea.focus(); c.el.scrollIntoView({block:'center',behavior:'smooth'}); });
+$('addMdTop').addEventListener('click', function(){ var c=createCell('markdown','## New markdown cell\n\nWrite something…'); setMdEditing(c,true); c.textarea.focus(); c.el.scrollIntoView({block:'center',behavior:'smooth'}); });
+$('addCodeBottom').addEventListener('click', function(){ var c=createCell('code',''); c.textarea.focus(); c.el.scrollIntoView({block:'center',behavior:'smooth'}); });
+$('addMdBottom').addEventListener('click', function(){ var c=createCell('markdown','## New markdown cell\n\nWrite something…'); setMdEditing(c,true); c.textarea.focus(); c.el.scrollIntoView({block:'center',behavior:'smooth'}); });
+$('downloadBtn').addEventListener('click', function(){
+  var name=($('filename').value||'notebook.ipynb').trim(); if(!/\.ipynb$/.test(name)) name+='.ipynb';
+  download(name, JSON.stringify(buildIpynb(),null,2), 'application/json'); toast('Downloaded '+name+' — opens in Jupyter, VS Code & Colab');
+});
+$('downloadPyBtn').addEventListener('click', function(){
+  var py=cells.filter(function(c){return c.type==='code'}).map(function(c){return c.textarea.value}).join('\n\n# %%\n\n');
+  download('notebook.py', py, 'text/x-python'); toast('Downloaded notebook.py');
+});
+$('importFile').addEventListener('change', function(e){
+  var f=e.target.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var nb=JSON.parse(r.result);
+      if(!nb.cells) throw new Error('No cells');
+      // clear current
+      cells.slice().forEach(function(c){ if(c.el.parentNode) c.el.parentNode.removeChild(c.el); }); cells=[];
+      nb.cells.forEach(function(nc){
+        var src=Array.isArray(nc.source)?nc.source.join(''): (nc.source||'');
+        var c=createCell(nc.cell_type==='markdown'?'markdown':'code', src);
+        if(nc.cell_type==='markdown') setMdEditing(c,false);
+      });
+      if(cells.length===0) createCell('code','');
+      $('filename').value=f.name;
+      toast('Opened '+f.name+' — '+cells.length+' cells');
+    }catch(err){ toast('That file could not be read as a .ipynb notebook.'); }
+    e.target.value='';
+  };
+  r.readAsText(f);
+});
+document.addEventListener('keydown', function(e){
+  if((e.ctrlKey||e.metaKey) && e.key==='s'){ e.preventDefault(); $('downloadBtn').click(); }
+});
+
+// Build starter notebook + start kernel
+STARTER.forEach(function(s){
+  var c=createCell(s.type, s.source);
+  if(s.type==='markdown') setMdEditing(c,false);
+});
+initKernel();
+</script>
+</body>
+</html>
